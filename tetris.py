@@ -1,11 +1,12 @@
-import pygame
 import random
 import sys
+
+import pygame
 
 # Game configuration
 WINDOW_WIDTH = 600
 WINDOW_HEIGHT = 700
-PLAY_WIDTH = 300   # 10 columns * 30px
+PLAY_WIDTH = 300  # 10 columns * 30px
 PLAY_HEIGHT = 600  # 20 rows * 30px
 BLOCK_SIZE = 30
 
@@ -20,28 +21,29 @@ GREY = (128, 128, 128)
 # Tetromino definitions using relative coordinates from pivot (0,0)
 # Shapes will be rotated by transform (x, y) -> (-y, x)
 SHAPES = {
-    'S': [(0, 0), (1, 0), (0, -1), (-1, -1)],
-    'Z': [(0, 0), (-1, 0), (0, -1), (1, -1)],
-    'I': [(0, 0), (-1, 0), (1, 0), (2, 0)],
-    'O': [(0, 0), (1, 0), (0, -1), (1, -1)],
-    'J': [(0, 0), (-1, 0), (1, 0), (-1, -1)],
-    'L': [(0, 0), (-1, 0), (1, 0), (1, -1)],
-    'T': [(0, 0), (-1, 0), (1, 0), (0, -1)],
+    "S": [(0, 0), (1, 0), (0, -1), (-1, -1)],
+    "Z": [(0, 0), (-1, 0), (0, -1), (1, -1)],
+    "I": [(0, 0), (-1, 0), (1, 0), (2, 0)],
+    "O": [(0, 0), (1, 0), (0, -1), (1, -1)],
+    "J": [(0, 0), (-1, 0), (1, 0), (-1, -1)],
+    "L": [(0, 0), (-1, 0), (1, 0), (1, -1)],
+    "T": [(0, 0), (-1, 0), (1, 0), (0, -1)],
 }
 
 # Assign distinct colors to shapes
 SHAPE_COLORS = {
-    'S': (80, 220, 100),
-    'Z': (220, 80, 80),
-    'I': (80, 210, 220),
-    'O': (220, 220, 80),
-    'J': (80, 80, 220),
-    'L': (220, 140, 80),
-    'T': (160, 80, 220),
+    "S": (80, 220, 100),
+    "Z": (220, 80, 80),
+    "I": (80, 210, 220),
+    "O": (220, 220, 80),
+    "J": (80, 80, 220),
+    "L": (220, 140, 80),
+    "T": (160, 80, 220),
 }
 
 COLUMNS = 10
 ROWS = 20
+
 
 class Piece:
     def __init__(self, x, y, shape_key):
@@ -66,7 +68,7 @@ class Piece:
     def positions(self, rotation=None):
         # Convert to grid positions
         pos = []
-        for (cx, cy) in self.rotated_cells(rotation):
+        for cx, cy in self.rotated_cells(rotation):
             pos.append((self.x + cx, self.y + cy))
         return pos
 
@@ -80,8 +82,10 @@ def create_grid(locked_positions):
 
 
 def valid_space(piece, grid, rotation=None):
-    accepted_positions = [(x, y) for y in range(ROWS) for x in range(COLUMNS) if grid[y][x] == BLACK]
-    for (x, y) in piece.positions(rotation):
+    accepted_positions = [
+        (x, y) for y in range(ROWS) for x in range(COLUMNS) if grid[y][x] == BLACK
+    ]
+    for x, y in piece.positions(rotation):
         if x < 0 or x >= COLUMNS or y >= ROWS:
             return False
         if y >= 0 and (x, y) not in accepted_positions:
@@ -91,7 +95,7 @@ def valid_space(piece, grid, rotation=None):
 
 def check_lost(locked_positions):
     # If any locked block is above the top (y < 0)
-    for (_, y) in locked_positions.keys():
+    for _, y in locked_positions.keys():
         if y < 0:
             return True
     return False
@@ -134,7 +138,7 @@ def clear_rows(grid, locked_positions):
     # Shift rows down by the number of cleared rows below each block
     rows_to_clear_set = set(rows_to_clear)
     # Process from bottom to top so moves don't overwrite
-    for (x, y) in sorted(list(locked_positions.keys()), key=lambda p: p[1], reverse=True):
+    for x, y in sorted(list(locked_positions.keys()), key=lambda p: p[1], reverse=True):
         # Count how many cleared rows are strictly below this y
         shift = sum(1 for r in rows_to_clear_set if r > y)
         if shift > 0:
@@ -148,12 +152,17 @@ def draw_window(surface, grid, score=0, lines=0, level=1):
     surface.fill((18, 18, 18))
 
     # Title
-    font = pygame.font.SysFont('arial', 36, bold=True)
-    label = font.render('Tetris', True, WHITE)
+    font = pygame.font.SysFont("arial", 36, bold=True)
+    label = font.render("Tetris", True, WHITE)
     surface.blit(label, (TOP_LEFT_X + PLAY_WIDTH // 2 - label.get_width() // 2, 10))
 
     # Play field
-    pygame.draw.rect(surface, WHITE, (TOP_LEFT_X - 2, TOP_LEFT_Y - 2, PLAY_WIDTH + 4, PLAY_HEIGHT + 4), 2)
+    pygame.draw.rect(
+        surface,
+        WHITE,
+        (TOP_LEFT_X - 2, TOP_LEFT_Y - 2, PLAY_WIDTH + 4, PLAY_HEIGHT + 4),
+        2,
+    )
 
     # Draw blocks
     for y in range(ROWS):
@@ -163,37 +172,47 @@ def draw_window(surface, grid, score=0, lines=0, level=1):
                 pygame.draw.rect(
                     surface,
                     color,
-                    (TOP_LEFT_X + x * BLOCK_SIZE, TOP_LEFT_Y + y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
+                    (
+                        TOP_LEFT_X + x * BLOCK_SIZE,
+                        TOP_LEFT_Y + y * BLOCK_SIZE,
+                        BLOCK_SIZE,
+                        BLOCK_SIZE,
+                    ),
                 )
                 pygame.draw.rect(
                     surface,
                     (30, 30, 30),
-                    (TOP_LEFT_X + x * BLOCK_SIZE, TOP_LEFT_Y + y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE),
+                    (
+                        TOP_LEFT_X + x * BLOCK_SIZE,
+                        TOP_LEFT_Y + y * BLOCK_SIZE,
+                        BLOCK_SIZE,
+                        BLOCK_SIZE,
+                    ),
                     1,
                 )
 
     draw_grid_lines(surface)
 
     # Score panel
-    font_small = pygame.font.SysFont('arial', 20)
+    font_small = pygame.font.SysFont("arial", 20)
     sx = TOP_LEFT_X + PLAY_WIDTH + 30
     sy = TOP_LEFT_Y + 50
-    score_label = font_small.render(f'Score: {score}', True, WHITE)
-    lines_label = font_small.render(f'Lines: {lines}', True, WHITE)
-    level_label = font_small.render(f'Level: {level}', True, WHITE)
+    score_label = font_small.render(f"Score: {score}", True, WHITE)
+    lines_label = font_small.render(f"Lines: {lines}", True, WHITE)
+    level_label = font_small.render(f"Level: {level}", True, WHITE)
     surface.blit(score_label, (sx, sy))
     surface.blit(lines_label, (sx, sy + 30))
     surface.blit(level_label, (sx, sy + 60))
 
 
 def draw_next_shape(surface, piece):
-    font = pygame.font.SysFont('arial', 24)
-    label = font.render('Next:', True, WHITE)
+    font = pygame.font.SysFont("arial", 24)
+    label = font.render("Next:", True, WHITE)
     sx = TOP_LEFT_X - 150
     sy = TOP_LEFT_Y + 50
     surface.blit(label, (sx, sy))
 
-    for (cx, cy) in piece.rotated_cells(0):
+    for cx, cy in piece.rotated_cells(0):
         x = sx + 60 + (cx + 2) * BLOCK_SIZE
         y = sy + 40 + (cy + 2) * BLOCK_SIZE
         pygame.draw.rect(surface, piece.color, (x, y, BLOCK_SIZE, BLOCK_SIZE))
@@ -289,7 +308,7 @@ def main(win):
                     return
 
         # Update grid with current piece
-        for (x, y) in current_piece.positions():
+        for x, y in current_piece.positions():
             if y >= 0:
                 try:
                     grid[y][x] = current_piece.color
@@ -298,7 +317,7 @@ def main(win):
 
         # If piece should lock
         if change_piece:
-            for (x, y) in current_piece.positions():
+            for x, y in current_piece.positions():
                 if y < 0:
                     # Piece locked above the visible area -> game over
                     run = False
@@ -326,9 +345,11 @@ def main(win):
         pygame.display.update()
 
     # Game over screen
-    font = pygame.font.SysFont('arial', 36, bold=True)
-    label = font.render('Game Over - Press R to Restart or ESC to Quit', True, WHITE)
-    win.blit(label, (WINDOW_WIDTH // 2 - label.get_width() // 2, WINDOW_HEIGHT // 2 - 20))
+    font = pygame.font.SysFont("arial", 36, bold=True)
+    label = font.render("Game Over - Press R to Restart or ESC to Quit", True, WHITE)
+    win.blit(
+        label, (WINDOW_WIDTH // 2 - label.get_width() // 2, WINDOW_HEIGHT // 2 - 20)
+    )
     pygame.display.update()
 
     waiting = True
@@ -349,18 +370,22 @@ def main(win):
 
 def main_menu():
     pygame.init()
-    pygame.display.set_caption('Tetris - Pygame')
+    pygame.display.set_caption("Tetris - Pygame")
     win = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     clock = pygame.time.Clock()
 
-    title_font = pygame.font.SysFont('arial', 44, bold=True)
-    info_font = pygame.font.SysFont('arial', 22)
+    title_font = pygame.font.SysFont("arial", 44, bold=True)
+    info_font = pygame.font.SysFont("arial", 22)
 
     while True:
         win.fill((18, 18, 18))
-        title = title_font.render('Press ENTER to Play', True, WHITE)
-        info1 = info_font.render('Controls: Left/Right to move, Up to rotate, Down to drop,', True, WHITE)
-        info2 = info_font.render('Space for hard drop, R to restart, ESC to quit', True, WHITE)
+        title = title_font.render("Press ENTER to Play", True, WHITE)
+        info1 = info_font.render(
+            "Controls: Left/Right to move, Up to rotate, Down to drop,", True, WHITE
+        )
+        info2 = info_font.render(
+            "Space for hard drop, R to restart, ESC to quit", True, WHITE
+        )
         win.blit(title, (WINDOW_WIDTH // 2 - title.get_width() // 2, 200))
         win.blit(info1, (WINDOW_WIDTH // 2 - info1.get_width() // 2, 280))
         win.blit(info2, (WINDOW_WIDTH // 2 - info2.get_width() // 2, 310))
@@ -379,5 +404,5 @@ def main_menu():
         clock.tick(60)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main_menu()
